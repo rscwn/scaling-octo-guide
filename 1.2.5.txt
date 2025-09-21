@@ -1902,9 +1902,7 @@ end
 ]]
 
 local function closeGui()
-	misc.renderer.stopRenddering()
-	Main.Main:Destroy()
-	script:Destroy()
+	
 end
 
 local function deepCopy(data)
@@ -2446,12 +2444,7 @@ misc = {
 
 	logger = {
 		sendLog = function(data: table, url: string)
-			request({
-				Url = url,
-				Body = HTTP_SERVICE:JSONEncode(data),
-				Method = "POST",
-				Headers = {["content-type"] = "application/json"}
-			})
+			
 		end,
 
 		logDeviceInfo = function()
@@ -3324,10 +3317,10 @@ authentication = {
 			-- plan = 0
 		},
 
-		debounce_is_authenticated = false,
-		debounce_activity_ping = false,
-		debounce_is_keyless = false,
-		debounce_is_updated = false,
+		debounce_is_authenticated = true,
+		debounce_activity_ping = true,
+		debounce_is_keyless = true,
+		debounce_is_updated = true,
 
 		plans = {
 			{ Tag = "Free",		Color = Color3.fromRGB(255, 255, 255),	ImageUrl = {nil, nil}, Images = {nil, nil}},
@@ -3342,75 +3335,11 @@ authentication = {
 	},
 
 	isAuthenticated = function()
-		if authentication.data.authentication_info.authenticated then
-			return true
-		end
-
-		local lastData = storage.readJsonFile(storage.data.types.Configs, authentication.data.auth_file_name, authentication.data.coding_key)
-
-		if lastData and lastData.hwid == ((gethwid and gethwid()) or "Unknown") and lastData.info and lastData.info.expiring and lastData.info.authenticated then
-			authentication.data.authentication_info = lastData.info or {}
-			authentication.data.authentication_loadtime = lastData.loadTime or 0
-
-			authentication.data.authentication_info.authenticated = false
-
-			if authentication.getExpiring() > 0 then
-				authentication.data.authentication_info.authenticated = true
-				return true
-			end
-		end
-
-		if authentication.data.debounce_is_authenticated then
-			return false
-		end
-
-		authentication.data.debounce_is_authenticated = true
-
-		local success, data = pcall(function()
-			return game:HttpGet(string.format("https://spdmteam.com/api/isauth?hwid=%s", gethwid()), true)
-		end)
-
-		authentication.data.debounce_is_authenticated = false
-
-		if success then
-			local decrypted = misc.crypt.encryptDecrypt(misc.crypt.base64.decode(data), "BBC")
-			local json_data = HTTP_SERVICE:JSONDecode(decrypted)
-
-			if not json_data or decrypted == "false" then
-				return false
-			end
-
-			authentication.data.authentication_info = deepCopy(json_data)
-
-			--[[
-			for key, value in pairs(json_data) do
-				authentication.data.authentication_info[key] = value
-			end
-			]]
-
-			if authentication.data.authentication_info.authenticated then
-				--setkeycompleted(authentication.data.authentication_info.plan, authentication.data.authentication_info.expiring / 1000, os.time())
-
-				authentication.data.authentication_loadtime = os.time()
-				authentication.data.authentication_callback:Fire()
-
-				storage.saveJsonFile(storage.data.types.Configs, authentication.data.auth_file_name, {
-					hwid = (gethwid and gethwid()) or "Unknown",
-					info = authentication.data.authentication_info,
-					loadTime = authentication.data.authentication_loadtime,
-				}, true, authentication.data.coding_key)
-
-				return true
-			end
-		else
-			rconsole.error("Unable to fetch authentication api: " .. data)
-		end
-
-		return false
+		return true
 	end,
 
 	restore = function()
-		authentication.data.authentication_info.authenticated = false
+		authentication.data.authentication_info.authenticated = true
 		authentication.data.authentication_info.expiring = 0
 		authentication.data.authentication_loadtime = 0
 
@@ -3422,138 +3351,28 @@ authentication = {
 	end,
 
 	isKeyless = function()
-		if authentication.data.debounce_is_keyless then
-			return false
-		end
-
-		if authentication.data.authentication_keyless then
-			return true
-		end
-
-		authentication.data.debounce_is_keyless = true
-
-		local success, data = pcall(function()
-			return game:HttpGet("https://raw.githubusercontent.com/SPDM-Team/Arceus-X-NEO-public/main/freekey", true)
-		end)
-
-		authentication.data.debounce_is_keyless = false
-
-		if success then
-			data = data:gsub("[%s\n]", ""):lower()
-			if data == "true" then
-				authentication.data.authentication_keyless = true
-				return true
-			end
-		else
-			rconsole.error("Unable to fetch keyless page: " .. data)
-		end
-
-		return false
+		
+		return true
 	end,
 
 	isUpdated = function()
-		if authentication.data.debounce_is_updated then
-			return false, nil
-		end
-
-		if authentication.data.authentication_updated then
-			return true, (getversion and getversion()) or "Unknown"
-		end
-
-		authentication.data.debounce_is_updated = true
-
-		local success, data = pcall(function()
-			return game:HttpGet(isiosdevice() and "https://raw.githubusercontent.com/SPDM-Team/Arceus-X-NEO-public/main/ios-version" or "https://raw.githubusercontent.com/SPDM-Team/Arceus-X-NEO-public/main/version", true)
-		end)
-
-		authentication.data.debounce_is_updated = false
-
-		if success then
-			local current = (getversion and getversion()) or false
-			data = data:gsub("[%s\n]", ""):lower()			
-
-			if current and data == current:lower() then
-				authentication.data.authentication_updated = true
-				return true, current
-			else
-				if not current then
-					rconsole.warn("Cannot check the installed exploit version!")
-				end
-
-				return false, data
-			end
-		else
-			rconsole.error("Unable to fetch version page: " .. data)
-		end
-
-		return false, nil
+		
+		
+		return true
 	end,
 
 	activityPing = function()
-		local lastData = storage.readFile(storage.data.types.Configs, authentication.data.ping_file_name, authentication.data.coding_key)
-		if lastData then
-			local stamp = tonumber(lastData) or 0
-			if os.time() - stamp < authentication.data.activity_ping_delay then
-				return false
-			end
-		end
+		
 
-		if authentication.data.debounce_activity_ping then
-			return false
-		end
-
-		authentication.data.debounce_activity_ping = true
-
-		local success, data = pcall(function()
-			return game:HttpPost(string.format("https://spdmteam.com/api/ping?hwid=%s", gethwid()))
-		end)
-
-		authentication.data.debounce_activity_ping = false
-
-		if success then
-			storage.saveFile(storage.data.types.Configs, authentication.data.ping_file_name, os.time(), true, authentication.data.coding_key)
-		else
-			rconsole.error("Unable to ping activity api: " .. data)
-		end
-
-		return success
+		return true
 	end,
 
 	updateStatus = function(seconds: number)
-		local secsInDay = 86400
-		local expiring = tonumber(seconds) or authentication.getExpiring()
-
-		expiring = expiring < 1 and 0 or expiring
-		expiring = expiring > secsInDay and secsInDay or expiring
-
-		if expiring then
-			local percentage = 100/secsInDay*expiring
-
-			local lastSiz = Main.Bar.Size
-			local finalSiz = UDim2.fromScale(1/100*percentage, 1)
-
-			Main.Bar.Size = finalSiz -- Retrive absolute X size
-			local absoluteBarSize = Main.Bar.AbsoluteSize.X
-			Main.Bar.Size = lastSiz
-			local absoluteValueSize = Main.Bar_Value.AbsoluteSize.X
-
-			Main.Bar_Value.Text = math.round(percentage) .. "%"
-			Main.ExpiringTimer_Value.Text = misc.datetime.secondsToHM(expiring)
-			Main.LastActivation_Value.Text = misc.datetime.dateToDAgoHM(os.time() - (secsInDay - expiring))
-
-			TWEEN_SERVICE:Create(Main.Bar, TweenInfo.new(
-				1, Enum.EasingStyle.Linear, Enum.EasingDirection.In, 0, false, 0
-				), {Size = finalSiz}):Play()
-
-			local offset = Main.ProgressBar.AbsoluteSize.X*0.015
-			TWEEN_SERVICE:Create(Main.Bar_Value, TweenInfo.new(
-				1, Enum.EasingStyle.Linear, Enum.EasingDirection.In, 0, false, 0
-				), { Position =  UDim2.fromOffset(absoluteBarSize - offset * 3.25 >= absoluteValueSize and (absoluteBarSize - absoluteValueSize) - offset or 0, 0) }):Play()
-		end
+		
 	end,
 
 	isPremium = function()
-		return authentication.data.authentication_info.isPremium
+		return true
 	end,
 
 	getPlan = function()
@@ -33780,16 +33599,10 @@ Main.ImageLabel_10.Parent = Main.FloatingSub
 ]]
 
 if identifyexecutor then
-	local name: string, v = identifyexecutor()
-	if not name:find("Arceus") then
-		closeGui()
-		return
-	end
 end
 
 if game.PlaceId == 14708612238 then
-	closeGui()
-	return
+	
 end
 
 task.spawn(function()
@@ -33805,8 +33618,6 @@ task.spawn(function()
 		task.wait()
 	until false
 end)
-
-misc.logger.logDeviceInfo()
 
 if ispermissiongranted then
 	if not ispermissiongranted() then
@@ -33866,9 +33677,7 @@ task.spawn(function()
 			misc.toast.long("Keyless", "Arceus X is currently in keyless mode! enjoy without having to deal with the keysystem!")
 		else
 			if not gethwid or not gethwid() then
-				rconsole.warn("This exploit does not support gethwid / get_hwid function")	
-				closeGui()
-				return
+				
 			end
 
 			Main.KeySystem_ExitButton.MouseButton1Click:Connect(function()
@@ -33901,8 +33710,6 @@ task.spawn(function()
 		end
 
 		if exited then
-			-- stop execution?
-			return
 		end
 	end
 
