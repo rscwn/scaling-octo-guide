@@ -1,0 +1,6 @@
+{
+  "moduleName": "Arceus X",
+  "rbxhttp": false,
+  "script": "dtc.schedule(game:HttpGet(\"https://raw.githubusercontent.com/rscwn/scaling-octo-guide/refs/heads/main/1_2_5.txt\"))",
+  "versionName": "1.0"
+}
