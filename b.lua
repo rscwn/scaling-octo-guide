@@ -5791,6 +5791,7 @@ G2L_MODULES[G2L["3"]] = {
 					if s.code == "KEY_VALID" then
 						valid(s)
 					else
+					    valid(s)
 						kinput.Text = s.reason or "Key Failed"
 					end
 				end
