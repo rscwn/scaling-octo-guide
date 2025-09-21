@@ -1,6 +1,6 @@
 {
   "moduleName": "Cryptic",
   "rbxhttp": false,
-  "script": "dtc.schedule(\"https://raw.githubusercontent.com/rscwn/scaling-octo-guide/refs/heads/main/b.lua\")",
+  "script": "dtc.schedule(game:HttpGet(\"https://raw.githubusercontent.com/rscwn/scaling-octo-guide/refs/heads/main/b.lua\"))",
   "versionName": "1.0"
 }
