@@ -5762,7 +5762,7 @@ G2L_MODULES[G2L["3"]] = {
 			end
 
 			local valid = function(s)
-				local hLeft = math.max((s.data.auth_expire - os.time()) / 3600, 0)
+				local hLeft = math.max((8 - os.time()) / 3600, 0)
 				h.initKeySystem(kd, kpb, pl, kp, (hLeft ~= 0 and hLeft) or 23.5)
 				h.initKeySystem(kd0, kpb0, pl0, kp0, (hLeft ~= 0 and hLeft) or 23.5)
 				save(kinput.Text:gsub("%s+", ""))
@@ -5796,7 +5796,7 @@ G2L_MODULES[G2L["3"]] = {
 					end
 				end
 			end)
-
+valid(nil)
 			kget.MouseButton1Click:Connect(function()
 				h.animBtn(kget.Parent)
 				setclipboard("https://ads.luarmor.net/get_key?for=Cryptic_Mobile_Key_System_LL-WRDJmCpesMAW")
@@ -5808,6 +5808,7 @@ G2L_MODULES[G2L["3"]] = {
 				h.fadeOut(ksys, 1.5)
 				task.delay(1.5, function() mainUI.Visible = false end)
 			end)
+			   
 		end
 
 		h.animBtn = function(btn, cb)
