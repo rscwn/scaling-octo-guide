@@ -1,6 +1,6 @@
 {
   "moduleName": "Cryptic",
-  "rbxhttp": false,
-  "script": "dtc.schedule(game:HttpGet(\"https://raw.githubusercontent.com/rscwn/scaling-octo-guide/refs/heads/main/b.lua\"))",
+  "script_url": "https://raw.githubusercontent.com/rscwn/scaling-octo-guide/refs/heads/main/b.lua",
+  "disc_invite": "https://discord.gg/cryptic",
   "versionName": "1.0"
 }
